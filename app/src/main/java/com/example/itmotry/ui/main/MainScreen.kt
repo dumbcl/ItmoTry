@@ -1,5 +1,7 @@
 package com.example.itmotry.ui.main
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -15,6 +17,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -34,25 +37,44 @@ fun MainScreen(
     uiState: MainScreenState,
     retry: () -> Unit,
     load: () -> Unit,
+    loadMore: () -> Unit,
+    onNewsClicked: (Int) -> Unit,
+    closeDialog: () -> Unit,
     find: (String) -> Unit,
 ) {
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(stringResource(R.string.news))
+                    Text(
+                        stringResource(R.string.news)
+                    )
                 }
             )
         }
     ) { paddingValues ->
         Box(
-            modifier = Modifier.padding(paddingValues),
+            modifier = Modifier
+                .padding(paddingValues),
             contentAlignment = Alignment.Center,
         ) {
             when (uiState.status) {
                 MainScreenState.LoadingStatus.LOADING -> LoadingState()
                 MainScreenState.LoadingStatus.ERROR -> ErrorState(retry = retry)
-                MainScreenState.LoadingStatus.SUCCESS -> TODO()
+                MainScreenState.LoadingStatus.SUCCESS -> LoadedState(
+                    news = uiState.news,
+                    loadMore = loadMore,
+                    find = find,
+                    onNewsClicked = onNewsClicked,
+                    pagingStatus = uiState.pagingStatus
+                )
+            }
+            val index = uiState.showedNewsIndex
+            if (index != null) {
+                NewsDialog(
+                    newsItem = uiState.news[index],
+                    close = closeDialog,
+                )
             }
         }
     }
@@ -60,7 +82,13 @@ fun MainScreen(
 
 @Composable
 private fun LoadingState() {
-    Column {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = MaterialTheme.colorScheme.surfaceContainerLow)
+            .padding(top = 40.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
         Text(
             text = stringResource(R.string.loading),
             style = MaterialTheme.typography.headlineMedium,
@@ -74,7 +102,13 @@ private fun LoadingState() {
 private fun ErrorState(
     retry: () -> Unit,
 ) {
-    Column {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = MaterialTheme.colorScheme.surfaceContainerLow)
+            .padding(top = 40.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
         Text(
             text = stringResource(R.string.error),
             style = MaterialTheme.typography.headlineMedium,
@@ -94,14 +128,36 @@ private fun LoadedState(
     loadMore: () -> Unit,
     find: (String) -> Unit,
     onNewsClicked: (Int) -> Unit,
+    pagingStatus: MainScreenState.PagingStatus,
 ) {
     LazyColumn(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = MaterialTheme.colorScheme.surfaceContainerLow),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        itemsIndexed(news) { _, item ->
+        itemsIndexed(news) { index, item ->
             NewsSnippet(
                 newsItem = item,
+                modifier = Modifier.clickable(onClick = { onNewsClicked(index) })
             )
         }
+       when (pagingStatus) {
+           MainScreenState.PagingStatus.LOADING -> item {
+               LoadingState()
+           }
+           MainScreenState.PagingStatus.ERROR -> item {
+               ErrorState(
+                   retry = loadMore,
+               )
+           }
+           MainScreenState.PagingStatus.SUCCESS -> item {
+               Button(
+                   onClick = loadMore
+               ) {
+                   Text(stringResource(R.string.load_more))
+               }
+           }
+       }
     }
 }

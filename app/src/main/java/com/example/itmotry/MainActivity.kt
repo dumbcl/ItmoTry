@@ -29,23 +29,19 @@ class MainActivity : AppCompatActivity() {
         initKoin {
             androidContext(this@MainActivity)
         }
+        viewModel.load()
         setContent {
             MaterialTheme {
                 MainScreen(
                     uiState = viewModel.uiState.collectAsState().value,
                     retry = { viewModel.retry() },
                     load = { viewModel.load() },
-                    find = { viewModel.search(it) }
+                    loadMore = { viewModel.loadMore() },
+                    find = { viewModel.search(it) },
+                    onNewsClicked = { viewModel.showNewsDialog(it) },
+                    closeDialog = { viewModel.closeNewsDialog() },
                 )
             }
         }
     }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier.Companion) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
 }

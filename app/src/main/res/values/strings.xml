@@ -1,8 +1,9 @@
 <resources>
-    <string name="app_name">ITMO_MEGA_OLYMP_APP</string>
+    <string name="app_name">News app</string>
     <string name="news">News</string>
     <string name="search_news">Search news</string>
     <string name="error">Something went wrong</string>
     <string name="loading">Loading…</string>
     <string name="try_again">Try again</string>
+    <string name="load_more">Load more</string>
 </resources>

@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.itmotry.R
 import com.skydoves.landscapist.glide.GlideImage
@@ -34,15 +35,17 @@ internal fun NewsSnippet(
                 color = MaterialTheme.colorScheme.primaryContainer,
                 shape = MaterialTheme.shapes.large,
             )
+            .padding(16.dp)
     ) {
         Text(
             text = newsItem.title,
-            style = MaterialTheme.typography.bodyLarge,
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 12.dp),
         )
         Text(
             text = newsItem.source,
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.bodyLarge,
             fontStyle = FontStyle.Italic,
             modifier = Modifier.padding(bottom = 12.dp),
         )
@@ -50,7 +53,7 @@ internal fun NewsSnippet(
             imageModel = { newsItem.urlToImage },
             loading = {
                 CircularProgressIndicator(
-                    modifier = Modifier.size(400.dp),
+                    modifier = Modifier.size(50.dp),
                 )
             },
             failure = {

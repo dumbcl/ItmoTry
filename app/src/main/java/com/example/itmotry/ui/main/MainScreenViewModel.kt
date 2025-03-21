@@ -17,6 +17,8 @@ class MainScreenViewModel(
         MainScreenState(
             news = emptyList(),
             status = MainScreenState.LoadingStatus.LOADING,
+            pagingStatus = MainScreenState.PagingStatus.SUCCESS,
+            showedNewsIndex = null,
         )
     )
 
@@ -72,6 +74,35 @@ class MainScreenViewModel(
         )
     }
 
+    fun loadMore() = viewModelScope.launch {
+        _uiState.update {
+            uiState.value.copy(
+                pagingStatus = MainScreenState.PagingStatus.LOADING
+            )
+        }
+        val news = async {
+            newsRepository.getAllNews(currentPage.value)
+        }.await()
+        news.fold(
+            onSuccess = { news ->
+                _uiState.update {
+                    uiState.value.copy(
+                        news = uiState.value.news + news,
+                        pagingStatus = MainScreenState.PagingStatus.SUCCESS
+                    )
+                }
+                currentPage.update { currentPage.value + 1 }
+            },
+            onFailure = { error ->
+                _uiState.update {
+                    uiState.value.copy(
+                        pagingStatus = MainScreenState.PagingStatus.ERROR
+                    )
+                }
+            }
+        )
+    }
+
     fun search(query: String) = viewModelScope.launch {
         currentPage.update { 1 }
         val news = async {
@@ -95,5 +126,21 @@ class MainScreenViewModel(
                 }
             }
         )
+    }
+
+    fun showNewsDialog(index: Int) {
+        _uiState.update {
+            uiState.value.copy(
+                showedNewsIndex = index
+            )
+        }
+    }
+
+    fun closeNewsDialog() {
+        _uiState.update {
+            uiState.value.copy(
+                showedNewsIndex = null,
+            )
+        }
     }
 }

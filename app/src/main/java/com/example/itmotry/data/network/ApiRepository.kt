@@ -5,16 +5,20 @@ import com.example.itmotry.PAGE_SIZE
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface ApiRepository {
-    @GET("everything?page={page}&pageSize=$PAGE_SIZE&apiKey=$API_KEY")
+    @GET("everything")
     suspend fun getAllNews(
-        @Path("page") page: Int,
+        @Query("page") page: Int,
+        @Query("pageSize") pageSize: Int = PAGE_SIZE,
+        @Query("apiKey") apiKey: String = API_KEY,
+        @Query("domains") domains: String = "techcrunch.com,thenextweb.com",
     ): NWArticlesResponse
 
     @GET("everything?q={query}&page={page}&pageSize=$PAGE_SIZE&apiKey=$API_KEY")
     suspend fun getQueryNews(
-        @Path("query") query: String,
-        @Path("page") page: Int,
+        @Query("query") query: String,
+        @Query("page") page: Int,
     ): NWArticlesResponse
 }
